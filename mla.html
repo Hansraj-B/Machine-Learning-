@@ -192,7 +192,7 @@ rfmodel$finalModel</code></pre>
 </div>
 <div id="out-of-sample-error-expectations" class="section level2">
 <h2>Out-of-sample Error Expectations</h2>
-<p>As indicated in the output for the random forest model, the OOB estimate of error rate is 1.47%. In-sample error estimates may be incorporating the noise from the in-sample set, that is why they are almost always too optimistic. Out-sample estimates of error are usually larger than in-sample estimates. Thus, I expect that the out-sample error rate will be around 1.47%, but most likely higher than 1.47%. A much higher error rate will indicate that the model is overfitting, or that there is something very different between the training set and the cross-validation dataset.</p>
+<p>As indicated in the output for the random forest model, the OOB estimate of error rate is 1.37%. In-sample error estimates may be incorporating the noise from the in-sample set, that is why they are almost always too optimistic. Out-sample estimates of error are usually larger than in-sample estimates. Thus, I expect that the out-sample error rate will be around 1.37%, but most likely higher than 1.37%. A much higher error rate will indicate that the model is overfitting, or that there is something very different between the training set and the cross-validation dataset.</p>
 </div>
 <div id="cross-validation" class="section level2">
 <h2>Cross-validation</h2>
@@ -233,7 +233,7 @@ confusionMatrix(predict, train2$classe)</code></pre>
 </div>
 <div id="out-of-sample-error-estimation" class="section level2">
 <h2>Out-of-sample Error Estimation</h2>
-<p>In the confusion matrix above, observe that the accuracy of the model is 0.9848. Subtracting this value from 1 gives us the error rate, 0.0152, or 1.52%. Compared to the in-sample error rate of 1.47%, we can observe that the out-of-sample error rate of 1.52% was slightly higher, as we expected. This suggests that our prediction model is able to predict a new dataset quiet well. The cross-validation has proved this model to be a good fit.</p>
+<p>In the confusion matrix above, observe that the accuracy of the model is 0.989. Subtracting this value from 1 gives us the error rate, 0.011, or 1.1%. Compared to the in-sample error rate of 1.47%, we can observe that the out-of-sample error rate of 1.1% was even slightly lower, not as we expected. This suggests that our prediction model is able to predict a new dataset very well. The cross-validation has proved this model to be a good fit.</p>
 </div>
 <div id="predictions-of-the-test-set" class="section level2">
 <h2>Predictions of the Test set</h2>
