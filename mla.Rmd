@@ -1,0 +1,75 @@
+---
+title: 'Practical Machine Learning: Prediction Assignment'
+author: "Anna Barbayeva"
+date: "November 14, 2016"
+output: pdf_document
+---
+
+## Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+## Loading the Data 
+Downloading data:
+```{data}
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv",
+            destfile = "./pml-training.csv")
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", 
+            destfile = "./pml-testing.csv)
+
+```
+Loading data: 
+```{data}
+training <- read.csv("pml-training.csv", na.strings=c("#DIV/0!"), row.names = 1)
+testing <- read.csv("pml-testing.csv", na.strings=c("#DIV/0!"), row.names = 1)
+```
+
+## Data pre-processing
+A lot of variables contain mostly strings of characters or NA's. Those are removed after manual inspection, resulting in 54 remaining variables with a large number of observations (n = 19622). In order to decrease the time of model creation, we will subset only 5000  rows of data.
+```{preprocessing}
+# Subset Data 
+set.seed(11111)
+train.sample <- sample(nrow(training), 5000)
+train.subset <- training[train.sample, ]
+
+# Remove irrelevant, unnecessary columns
+train.dropna <- train.subset[, colSums(is.na(train.subset)) < 100]  #Remove columns with more than 100 NA values
+train.dropchr <- train.dropna[, !sapply(train.dropna, is.character)]  #Remove columns of 'character'' type
+train.final <- train.dropchr[, 4:56]  #Remove other irrelevant columns through manual inspection
+train.final$classe <- factor(train.subset$classe)  #Make classe a factor variable
+
+# Create Data Partition: Subset 20% of training data for cross-validation
+library(caret)
+inTrain <- createDataPartition(y = train.final$classe, p = 0.8, list = FALSE)
+train1 <- train.final[inTrain, ]
+train2 <- train.final[-inTrain, ]
+```
+
+
+## Random Forest Classification Tree 
+We will create model based on a random forest algorithm, using  80% of the training data (4002 observations). We have 998 more observations for cross-validation. 
+Below, you can see the output for the final model, "rfmodel".
+```{rf Data, cache=TRUE, echo=TRUE}
+rfmodel <- train(classe~., data = train1, method = "rf")
+rfmodel$finalModel
+```
+
+## Out-of-sample Error Expectations
+As indicated in the output for the random forest model, the OOB estimate of error rate is 1.47%. In-sample error estimates may be incorporating the noise from the in-sample set, that is why they are almost always too optimistic. Out-sample estimates of error are usually larger than in-sample estimates. Thus, I expect that the out-sample error rate will be around 1.47%, but most likely higher than 1.47%. A much higher error rate will indicate that the model is overfitting, or that there is something very different between the training set and the cross-validation dataset.
+
+## Cross-validation 
+Now we will test our random forest model on the remaining part of the training dataset "train2", which contains 998 observations. WThen we eill construct a confusion matrix which will show how the model's predictions are compared with the actual classes.
+```{cross-validation}
+predict <- predict(rfmodel, newdata = train2)
+confusionMatrix(predict, train2$classe)
+```
+
+## Out-of-sample Error Estimation 
+In the confusion matrix above, observe that the accuracy of the model is 0.9848. Subtracting this value from 1 gives us the error rate, 0.0152, or 1.52%. Compared to the in-sample error rate of 1.47%, we can observe that the out-of-sample error rate of 1.52% was slightly higher, as we expected. This suggests that our prediction model is able to predict a new dataset quiet well.
+The cross-validation has proved this model to be a good fit.
+
+## Predictions of the Test set
+```{prediction}
+predictions.test <- predict(rfmodel, newdata = test)
+data.frame("Predictions" = predictions.test)
+``` 
